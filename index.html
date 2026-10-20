@@ -1,0 +1,1718 @@
+
+<!doctype html>
+<html lang="es">
+  <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Nequixd</title>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --ink:#29152b;
+    --muted:#5c535d;
+    --pink:#e0007a;
+    --status:#c85b70;
+    --green:#b7efd8;
+}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:#faf6f9;
+    color:var(--ink);
+    font-family:Manrope,Arial,sans-serif;
+}
+.topbar{
+    height:70px;
+    background:#210021;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:25px;
+    padding:0 25px;
+    font-size:22px;
+}
+.topbar .back{
+    font-size:39px;
+    line-height:1;
+    font-weight:400;
+}
+main{
+    max-width:600px;
+    margin:24px auto;
+    padding:0 16px;
+}
+.panel{
+    background:#fff;
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 3px 18px #30112a0d;
+}
+.panel h2{
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 18px;
+}
+label{
+    display:block;
+    font-size:13px;
+    color:#514650;
+    font-weight:600;
+    margin:14px 0 6px;
+}
+input,select{
+    width:100%;
+    border:1px solid #e4dce3;
+    border-radius:8px;
+    padding:12px;
+    font:400 15px Manrope,Arial,sans-serif;
+    background:white;
+    color:var(--ink);
+}
+button{
+    border:0;
+    border-radius:8px;
+    background:var(--pink);
+    color:#fff;
+    padding:14px 16px;
+    font:600 15px Manrope,Arial,sans-serif;
+    cursor:pointer;
+    width:100%;
+    margin-top:18px;
+}
+.note{
+    font-size:12px;
+    color:#6c626c;
+    line-height:1.5;
+    margin-top:12px;
+}
+
+/* COMPROBANTE ORIGINAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    background:#170a18a6;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+}
+.modal.open{display:flex}
+.modal-inner{
+    width:min(100%,480px);
+    max-height:calc(100dvh - 24px);
+    display:flex;
+    flex-direction:column;
+    background:#faf6f9;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 15px 60px #0004;
+}
+.modal-head{
+    height:58px;
+    flex:0 0 58px;
+    display:flex;
+    align-items:center;
+    gap:22px;
+    padding:0 18px;
+    font-size:17px;
+    font-weight:700;
+}
+.modal-head button{
+    background:transparent;
+    color:var(--ink);
+    width:auto;
+    padding:0;
+    margin:0;
+    font-size:29px;
+    font-weight:400;
+}
+.modal-head #back{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    width:29px;
+    height:40px;
+    flex-shrink:0;
+}
+.icono-atras{
+    display:block;
+    width:31px;
+    height:31px;
+    object-fit:contain;
+    flex-shrink:0;
+    filter:
+        drop-shadow(0.1px 0 0 currentColor)
+        drop-shadow(-0.1px 0 0 currentColor)
+        drop-shadow(0 0.1px 0 currentColor)
+        drop-shadow(0 -0.1px 0 currentColor);
+}
+.receipt{
+    background-image:url('./fondo.png')!important;
+	touch-action: none;
+    overscroll-behavior: none;
+    background-size:100% 100%!important;
+    background-position:center!important;
+    background-repeat:no-repeat!important;
+    background-color:transparent!important;
+	
+}
+
+.receipt::-webkit-scrollbar{display:none}
+body.modal-open{overflow:hidden}
+.receipt>*{position:relative}
+.status{
+    color:var(--status);
+    font-size:17px;
+    font-weight:400;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin:17px 0 19px;
+}
+.circle{
+    border:2px solid currentColor;
+    border-radius:50%;
+    width:24px;
+    height:24px;
+    display:grid;
+    place-items:center;
+    font-size:15px;
+    line-height:1;
+}
+.dotted{
+    border-top:2.5px dotted #d6d0d6;
+	width: calc(100% - 12px);
+	margin-left: 6px;
+    margin-bottom:17px;
+	transform: translateY(18px);
+}
+.qrbox{
+    width:150px;
+    height:150px;
+    flex:0 0 154px;
+	transform:translateY(27px);
+    margin:0 auto 14px;
+    padding:5px;
+    border:4.5px solid var(--green);
+    border-radius:7px;
+    background:#fff;
+    display:grid;
+    place-items:center;
+}
+.qr{
+    position:relative;
+    width:103%;
+    height:103%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:white;
+    overflow:hidden;
+}
+.qr canvas{
+    display:block;
+    width:100%!important;
+    height:100%!important;
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    margin:auto;
+}
+.qr img:not(.qr-logo){
+    display:block;
+    width:100%!important;
+    height:100%!important;
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    margin:auto;
+}
+.qr .qr-logo{
+    position:absolute;
+    width:35px;
+    height:35px;
+    object-fit:contain;
+    background:white;
+    padding:4px;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    z-index:2;
+    pointer-events:none;
+}
+.icono-compartir{
+    width:37px;
+    height:37px;
+    object-fit:contain;
+    display:block;
+    flex-shrink:0;
+    filter:
+        drop-shadow(0.4px 0 0 #210021)
+        drop-shadow(0.4px 0 0 #210021);
+}
+.modal-head{
+    padding-right:0.5px!important;
+}
+.qr i{background:#111}
+.qr i:nth-child(4n),
+.qr i:nth-child(7n),
+.qr i:nth-child(13n),
+.qr i:nth-child(17n){
+    background:white;
+}
+.qrlabel{
+    padding-left:10px;
+    transform:translateY(28px);
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+}
+.infoicon{
+    width:30px;
+    height:30px;
+    object-fit:contain;
+    filter:drop-shadow(0.5px 0 0 currentColor);
+}
+.icono-flecha{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+    display:inline-block;
+    vertical-align:middle;
+    flex-shrink:0;
+    filter:
+        drop-shadow(0.2px 0 0 currentColor)
+        drop-shadow(-0.2px 0 0 currentColor)
+        drop-shadow(0 0.2px 0 currentColor)
+        drop-shadow(0 -0.2px 0 currentColor);
+}
+.info{
+    font-size:15px;
+    line-height:1.3;
+    font-weight:400;
+    margin-bottom:17px;
+    overflow-wrap:anywhere;
+    color:#302033;
+}
+.value{
+    font-size:15px;
+    font-weight:500;
+    line-height:1.3;
+    margin-top:2px;
+    color:#29152b;
+}
+.payment-detail .value{font-size:16px}
+.amount{
+    font-size:16px;
+    color:#29152b;
+    font-weight:600;
+}
+.stamp{
+    position:relative!important;
+    left:auto;
+    right:auto;
+    top:auto;
+    transform:none;
+    border:1px solid #c8006f88;
+    color:#8b245d;
+    font-weight:700;
+    font-size:10px;
+    text-align:center;
+    padding:5px 3px;
+    letter-spacing:.5px;
+    background:#ffffffdf;
+    z-index:3;
+    pointer-events:none;
+    order:99;
+    margin-top:8px;
+    flex:0 0 auto;
+}
+.bottom{
+    margin-top:auto;
+    padding-top:6px;
+    flex:0 0 auto;
+}
+.bottom button{
+    margin:0;
+    height:50px;
+    border-radius:7px;
+    font-size:18px;
+    font-weight:500;
+}
+.closebutton{
+    background:transparent;
+    color:var(--ink);
+    margin:0;
+    width:auto;
+    padding:8px 12px;
+    font-size:16px;
+}
+
+@media(max-width:420px){
+    .modal{padding:0}
+    .modal-inner{
+        width:100%;
+        height:100dvh;
+        max-height:100dvh;
+        border-radius:0;
+    }
+    .modal-head{
+        height:54px;
+        flex-basis:54px;
+        font-size:17px;
+        gap:18px;
+    }
+    .receipt{
+        height:calc(100dvh - 54px);
+        padding:12px 25px 10px;
+        overflow:hidden;
+        background:url('./assets/fondo.png') center / 100% 100% no-repeat;
+    }
+    .status{
+        margin:16px 0 15px;
+        font-size:16px;
+		transform:translateY(18px);
+    }
+    .dotted{margin-bottom:13px}
+    .qrbox{
+        width:138px;
+        height:138px;
+        flex-basis:138px;
+        margin-bottom:12px;
+    }
+    .qrlabel{
+        font-size:12px;
+        margin-bottom:14px;
+    }
+    .info,.value{font-size:14.5px}
+    .amount{
+        font-size:15px;
+        font-weight:500;
+    }
+    .info{margin-bottom:14px}
+    .payment-detail .value{font-size:15px}
+    .bottom button{
+        height:48px;
+        font-size:17px;
+    }
+}
+
+@media print{
+    body *{visibility:hidden}
+    .modal.open,.modal.open *{visibility:visible}
+    .modal{
+        display:block!important;
+        position:absolute;
+        inset:0;
+        background:white;
+        padding:0;
+    }
+    .modal-inner{
+        width:100%;
+        max-height:none;
+        box-shadow:none;
+    }
+    .modal-head{display:none}
+    .receipt{
+        height:100vh;
+        max-height:none;
+        overflow:visible;
+    }
+    .stamp{display:block}
+}
+
+/* FORMULARIO PRINCIPAL: DISEÑO BLANCO Y ROSADO */
+body:not(.modal-open){
+    background:#ffffff;
+    color:var(--ink);
+    min-height:100dvh;
+}
+
+body:not(.modal-open)::before{
+    content:none;
+}
+
+.topbar{
+    position:relative;
+    z-index:1;
+    height:76px;
+    background:#ffffff;
+    border-bottom:1px solid #f3dce9;
+    box-shadow:none;
+    color:var(--ink);
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.topbar .back{
+    color:var(--pink);
+}
+
+main{
+    position:relative;
+    z-index:1;
+    max-width:600px;
+    margin:28px auto;
+    padding:0 16px;
+}
+
+.panel{
+    position:relative;
+    overflow:hidden;
+    background:#ffffff;
+    border:0;
+    border-radius:14px;
+    padding:30px 24px;
+    box-shadow:none;
+}
+
+.panel::before{
+    content:none;
+}
+
+.panel h1{
+    font-size:clamp(28px,7vw,37px);
+    font-weight:700;
+    color:var(--ink);
+    margin:14px 0 30px;
+    letter-spacing:-1px;
+    text-shadow:none;
+}
+
+.panel h1::before{
+    content:none;
+}
+
+.panel h1::after{
+    content:"";
+    display:block;
+    width:55px;
+    height:3px;
+    margin-top:16px;
+    border-radius:4px;
+    background:var(--pink);
+    box-shadow:none;
+}
+
+.panel label{
+    color:#a72b79;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.3px;
+    margin:20px 0 9px;
+}
+
+.panel input,
+.panel select{
+    width:100%;
+    min-height:56px;
+    background:#fcf7fa;
+    border:1px solid #f0dce8;
+    border-radius:11px;
+    padding:15px 16px;
+    font-family:Manrope,Arial,sans-serif;
+    font-size:15px;
+    font-weight:500;
+    color:var(--ink);
+    outline:none;
+    box-shadow:none;
+    transition:
+        border-color .25s,
+        box-shadow .25s,
+        background .25s;
+}
+
+.panel input::placeholder{
+    color:#958895;
+    opacity:1;
+}
+
+.panel input:focus,
+.panel select:focus{
+    border-color:var(--pink);
+    background:#ffffff;
+    box-shadow:0 0 0 3px #e0007a12;
+}
+
+.panel select{
+    appearance:auto;
+    color:var(--ink);
+    background-color:#fcf7fa;
+    border-color:#f0d0e1;
+    cursor:pointer;
+}
+
+.panel select option{
+    background:#ffffff;
+    color:var(--ink);
+}
+
+.panel #generate{
+    width:100%;
+    min-height:60px;
+    margin-top:30px;
+    padding:16px;
+    border:1px solid #ec168a;
+    border-radius:8px;
+    background:var(--pink);
+    color:#ffffff;
+    font-size:17px;
+    font-weight:700;
+    letter-spacing:0;
+    box-shadow:none;
+}
+
+.panel #generate:active{
+    transform:scale(.98);
+    filter:brightness(1.05);
+}
+
+.panel .note{
+    margin-top:22px;
+    padding:14px;
+    border:1px solid #f0dce8;
+    border-left:3px solid var(--pink);
+    border-radius:8px;
+    background:#fcf7fa;
+    color:#8e818d;
+    font-size:11px;
+    line-height:1.7;
+}
+
+
+
+/* =========================================
+   NEQUIXD — CYBERPUNK NEON ACCESS
+   Rediseño exclusivo de Acceso restringido
+   ========================================= */
+
+#access-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(
+            ellipse at 50% 42%,
+            #32102f 0%,
+            #160817 42%,
+            #08050d 100%
+        );
+    font-family: Manrope, Arial, sans-serif;
+}
+
+/* Líneas de circuito del fondo */
+
+#access-screen::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .35;
+    background:
+        linear-gradient(
+            135deg,
+            transparent 47%,
+            #e0007a 47.1%,
+            transparent 47.5%
+        ),
+        linear-gradient(
+            135deg,
+            transparent 48.5%,
+            #8e1bc0 48.6%,
+            transparent 48.9%
+        );
+    transform: rotate(-8deg);
+}
+
+#access-screen::after {
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    top: -190px;
+    right: -120px;
+    z-index: -1;
+    border: 1px solid #e0007a65;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 25px #e0007a08,
+        0 0 0 55px #e0007a06,
+        0 0 60px #e0007a20;
+    pointer-events: none;
+}
+
+/* PANEL FUTURISTA */
+
+.access-card {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    max-width: 440px;
+    padding: 37px 25px 34px;
+    overflow: hidden;
+    text-align: center;
+    color: #ffffff;
+    background:
+        linear-gradient(
+            145deg,
+            #17101f 0%,
+            #0b0813 55%,
+            #19091b 100%
+        );
+    border: 1px solid #e0007a;
+    border-radius: 5px 27px 5px 27px;
+    box-shadow:
+        0 0 0 1px #e0007a20,
+        0 0 35px #e0007a19,
+        0 25px 80px #00000080,
+        inset 0 0 35px #e0007a08;
+}
+
+/* Borde superior de neón */
+
+.access-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    width: 70%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #bd53ff,
+        #e0007a,
+        transparent
+    );
+    box-shadow: 0 0 15px #e0007a;
+}
+
+/* Detalle técnico inferior */
+
+.access-card::after {
+    content: "DEVELOPER / TELEGRAM / @NEQUIXDV1";
+    display: block;
+    margin-top: 24px;
+    padding-top: 15px;
+    border-top: 1px solid #e0007a30;
+    color: #8d648d;
+    font-family: manrope;
+    font-size: 9px;
+    letter-spacing: 3px;
+}
+
+/* CABECERA */
+
+.access-tag {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 30px;
+    color: #f4d8f0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+}
+
+.access-tag::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    background: #e0007a;
+    box-shadow:
+        0 0 7px #e0007a,
+        0 0 15px #e0007a;
+    transform: rotate(45deg);
+}
+
+/* EMBLEMA DE SEGURIDAD */
+
+.access-symbol {
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 108px;
+    height: 108px;
+    margin: 0 auto 27px;
+    border: 1px solid #e0007a;
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle,
+            #4a103e 0%,
+            #190b22 65%,
+            #0b0813 100%
+        );
+    color: #ff168e;
+    font-size: 56px;
+    line-height: 1;
+    text-shadow:
+        0 0 8px #e0007a,
+        0 0 25px #e0007a90;
+    box-shadow:
+        0 0 0 6px #e0007a0b,
+        0 0 0 12px #e0007a08,
+        0 0 30px #e0007a35,
+        inset 0 0 25px #e0007a12;
+}
+
+.access-symbol::before {
+    content: "";
+    position: absolute;
+    inset: -9px;
+    border: 2px dashed #e0007a70;
+    border-radius: 50%;
+}
+
+/* TÍTULO */
+
+.access-card h2 {
+    margin: 0 0 13px;
+    color: #ffffff;
+    font-size: clamp(25px, 7vw, 32px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    text-shadow: 0 0 25px #e0007a20;
+}
+
+/* PALABRA DESTACADA */
+
+.access-card h2::after {
+    content: "";
+    display: block;
+    width: 55px;
+    height: 3px;
+    margin: 13px auto 0;
+    background: #e0007a;
+    box-shadow: 0 0 12px #e0007a;
+}
+
+/* DESCRIPCIÓN */
+
+.access-card p {
+    margin: 0 0 28px;
+    color: #b7a8bd;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* CAMPO DE CONTRASEÑA */
+
+#access-password {
+    display: block;
+    width: 100%;
+    height: 64px;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid #a52b83;
+    border-radius: 4px 15px 4px 15px;
+    outline: none;
+    background:
+        linear-gradient(
+            110deg,
+            #17101f,
+            #211023,
+            #120c1a
+        );
+    color: #ffffff;
+    text-align: center;
+    font-family: monospace;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 10px;
+    box-shadow:
+        inset 0 0 20px #e0007a09,
+        0 0 15px #e0007a08;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+#access-password::placeholder {
+    color: #d1b5cd;
+    opacity: .65;
+}
+
+#access-password:focus {
+    border-color: #ff1595;
+    background: #190b20;
+    box-shadow:
+        0 0 0 2px #e0007a20,
+        0 0 25px #e0007a20,
+        inset 0 0 18px #e0007a10;
+}
+
+/* BOTÓN PRINCIPAL */
+
+#access-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 62px;
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ff4baa;
+    border-radius: 4px 15px 4px 15px;
+    background: linear-gradient(
+        105deg,
+        #a90060 0%,
+        #e0007a 50%,
+        #b90080 100%
+    );
+    color: #ffffff;
+    font-family: Manrope, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow:
+        0 0 12px #e0007a40,
+        0 8px 25px #00000035,
+        inset 0 1px 0 #ffffff35;
+    transition:
+        transform .2s ease,
+        filter .2s ease,
+        box-shadow .2s ease;
+}
+
+#access-button::after {
+    content: "→";
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+#access-button:active {
+    transform: scale(.98);
+    filter: brightness(1.2);
+    box-shadow:
+        0 0 25px #e0007a65,
+        inset 0 0 15px #ffffff15;
+}
+
+/* MENSAJE DE ERROR */
+
+#access-error {
+    min-height: 20px;
+    margin-top: 15px;
+    color: #ff5b9f;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* OCULTAR PANTALLA DESPUÉS DE VALIDAR */
+
+#access-screen.access-hidden {
+    display: none;
+}
+
+/* AJUSTES PARA TELÉFONOS */
+
+@media (max-width: 420px) {
+    #access-screen {
+        padding: 19px;
+    }
+
+    .access-card {
+        max-width: 100%;
+        padding: 32px 21px 27px;
+        border-radius: 4px 23px 4px 23px;
+    }
+
+    .access-tag {
+        gap: 8px;
+        margin-bottom: 28px;
+        font-size: 9px;
+        letter-spacing: 1.8px;
+    }
+
+    .access-symbol {
+        width: 94px;
+        height: 94px;
+        margin-bottom: 25px;
+        font-size: 49px;
+    }
+
+    .access-card h2 {
+        font-size: clamp(24px, 7vw, 29px);
+    }
+
+    .access-card p {
+        font-size: 12px;
+        margin-bottom: 25px;
+    }
+
+    #access-password {
+        height: 60px;
+        font-size: 23px;
+    }
+
+    #access-button {
+        min-height: 58px;
+        padding: 13px 8px;
+        gap: 8px;
+        font-size: 12px;
+        letter-spacing: .6px;
+    }
+
+    .access-card::after {
+        margin-top: 21px;
+        font-size: 8px;
+    }
+}
+
+/* PANTALLAS PEQUEÑAS */
+
+@media (max-height: 650px) {
+    #access-screen {
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+
+    .access-card {
+        margin: auto 0;
+        padding-top: 25px;
+        padding-bottom: 20px;
+    }
+
+    .access-tag {
+        margin-bottom: 20px;
+    }
+
+    .access-symbol {
+        width: 76px;
+        height: 76px;
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+
+    .access-card p {
+        margin-bottom: 18px;
+    }
+
+    #access-password {
+        height: 54px;
+    }
+
+    #access-button {
+        min-height: 54px;
+        margin-top: 15px;
+    }
+
+    .access-card::after {
+        margin-top: 15px;
+        padding-top: 10px;
+    }
+}
+
+
+
+
+/* AJUSTE COMPACTO Y FIJO DEL FORMULARIO PRINCIPAL */
+body:not(.modal-open) {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+body:not(.modal-open) .topbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 5;
+    height: 62px;
+    padding: 0 20px;
+    gap: 18px;
+    font-size: 20px;
+    letter-spacing: .2px;
+    background: rgba(255,255,255,.97);
+    border-bottom: 1px solid #f1e5ed;
+}
+
+body:not(.modal-open) .topbar .back {
+    font-size: 34px;
+}
+
+body:not(.modal-open) main {
+    position: fixed;
+    inset: 62px 0 0;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 12px 18px 14px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body:not(.modal-open) .panel {
+    width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    padding: 12px 18px 14px;
+    border: 1px solid #f2e6ee;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(41, 21, 43, .055);
+}
+
+body:not(.modal-open) .panel h1 {
+    margin: 0 0 17px;
+    font-size: clamp(25px, 6vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -.8px;
+}
+
+body:not(.modal-open) .panel h1::after {
+    width: 46px;
+    height: 3px;
+    margin-top: 10px;
+}
+
+body:not(.modal-open) .panel label {
+    margin: 11px 0 5px;
+    color: #8f286c;
+    font-size: 12px;
+    letter-spacing: .1px;
+}
+
+body:not(.modal-open) .panel input,
+body:not(.modal-open) .panel select {
+    min-height: 44px;
+    height: 44px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fdf9fc;
+    border-color: #eadde7;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+body:not(.modal-open) .panel input:focus,
+body:not(.modal-open) .panel select:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(224, 0, 122, .09);
+}
+
+body:not(.modal-open) .panel #generate {
+    min-height: 48px;
+    height: 48px;
+    margin-top: 17px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #e0007a, #c90070);
+    box-shadow: 0 5px 13px rgba(224, 0, 122, .16);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+body:not(.modal-open) .panel .note {
+    margin: 12px 0 0;
+    padding: 9px 11px;
+    border: 1px solid #f0e3ec;
+    border-left: 3px solid var(--pink);
+    border-radius: 9px;
+    background: #fcf8fb;
+    color: #857985;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+@media (max-height: 700px) {
+    body:not(.modal-open) main {
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+    body:not(.modal-open) .panel {
+        padding: 9px 15px 10px;
+    }
+    body:not(.modal-open) .panel h1 {
+        margin-bottom: 10px;
+        font-size: 25px;
+    }
+    body:not(.modal-open) .panel label {
+        margin-top: 8px;
+    }
+    body:not(.modal-open) .panel input,
+    body:not(.modal-open) .panel select {
+        min-height: 40px;
+        height: 40px;
+        padding: 8px 10px;
+    }
+    body:not(.modal-open) .panel #generate {
+        min-height: 43px;
+        height: 43px;
+        margin-top: 12px;
+    }
+    body:not(.modal-open) .panel .note {
+        margin-top: 9px;
+        padding: 7px 9px;
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 360px) {
+    body:not(.modal-open) main {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    body:not(.modal-open) .panel {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+}
+
+
+/* RETOQUE: FORMULARIO UN POCO MÁS ARRIBA Y LIGERAMENTE MÁS GRANDE */
+body:not(.modal-open) main {
+    padding-top: 4px;
+    padding-bottom: 18px;
+    align-items: flex-start;
+}
+
+body:not(.modal-open) .panel {
+    margin-top: 4px;
+    padding: 16px 20px 17px;
+}
+
+body:not(.modal-open) .panel h1 {
+    font-size: clamp(27px, 6.4vw, 32px);
+    margin-bottom: 19px;
+}
+
+body:not(.modal-open) .panel label {
+    font-size: 13px;
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
+body:not(.modal-open) .panel input,
+body:not(.modal-open) .panel select {
+    height: 47px;
+    min-height: 47px;
+    padding: 11px 13px;
+    font-size: 15px;
+}
+
+body:not(.modal-open) .panel #generate {
+    height: 51px;
+    min-height: 51px;
+    margin-top: 19px;
+    font-size: 16px;
+}
+
+body:not(.modal-open) .panel .note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    font-size: 10.5px;
+}
+
+@media (max-height: 700px) {
+    body:not(.modal-open) main {
+        padding-top: 3px;
+        padding-bottom: 8px;
+    }
+    body:not(.modal-open) .panel {
+        margin-top: 2px;
+        padding: 11px 16px 12px;
+    }
+    body:not(.modal-open) .panel h1 {
+        font-size: 27px;
+        margin-bottom: 12px;
+    }
+    body:not(.modal-open) .panel label {
+        margin-top: 9px;
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+    body:not(.modal-open) .panel input,
+    body:not(.modal-open) .panel select {
+        height: 42px;
+        min-height: 42px;
+        font-size: 14px;
+    }
+    body:not(.modal-open) .panel #generate {
+        height: 46px;
+        min-height: 46px;
+        margin-top: 14px;
+    }
+    body:not(.modal-open) .panel .note {
+        margin-top: 10px;
+        padding: 8px 10px;
+        font-size: 9.5px;
+    }
+}
+
+
+/* ÚLTIMO AJUSTE: CAMPOS UN POCO MÁS GRANDES Y TÍTULO MÁS DISCRETO */
+body:not(.modal-open) .panel h1 {
+    font-size: clamp(25px, 5.8vw, 29px);
+    margin-bottom: 17px;
+}
+
+body:not(.modal-open) .panel label {
+    font-size: 13.5px;
+    margin-top: 13px;
+    margin-bottom: 6px;
+}
+
+body:not(.modal-open) .panel input,
+body:not(.modal-open) .panel select {
+    height: 50px;
+    min-height: 50px;
+    padding: 12px 14px;
+    font-size: 15.5px;
+}
+
+body:not(.modal-open) .panel #generate {
+    height: 54px;
+    min-height: 54px;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+body:not(.modal-open) .panel .note {
+    margin-top: 15px;
+    padding: 11px 12px;
+    font-size: 10.5px;
+}
+
+@media (max-height: 700px) {
+    body:not(.modal-open) .panel h1 {
+        font-size: 25px;
+        margin-bottom: 12px;
+    }
+    body:not(.modal-open) .panel label {
+        margin-top: 9px;
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+    body:not(.modal-open) .panel input,
+    body:not(.modal-open) .panel select {
+        height: 43px;
+        min-height: 43px;
+        font-size: 14px;
+    }
+    body:not(.modal-open) .panel #generate {
+        height: 47px;
+        min-height: 47px;
+        margin-top: 14px;
+		
+		/* Bloquear selección de texto en toda la aplicación */
+html,
+body,
+body * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Mantener funcionales los campos del formulario */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
+    }
+}
+
+</style>
+  </head>
+<script>
+  
+  /*EVITAR COPIAR */
+document.addEventListener('selectstart', function (e) {
+    if (!e.target.closest('input, textarea, select, [contenteditable="true"]')) {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('contextmenu', function (e) {
+    if (!e.target.closest('input, textarea, select')) {
+        e.preventDefault();
+    }
+});
+</script>
+  <body>
+
+	<!-- ACCESO CON CLAVE -->
+
+	<div id="access-screen">
+	  <div class="access-card">
+
+        <div class="access-tag">
+		  ◈ NEQUIXD ◈
+        </div>
+
+        <div class="access-symbol">⬡</div>
+
+        <h2>Acceso restringido</h2>
+
+        <p>Introduce tu PIN de acceso</p>
+
+        <input
+		  type="password"
+		  id="access-password"
+		  placeholder="••••"
+		  inputmode="numeric"
+		  maxlength="4"
+		  autocomplete="off"
+        >
+
+        <button id="access-button">
+		  INGRESAR
+        </button>
+
+        <div id="access-error" role="alert"></div>
+	  </div>
+	</div>
+
+	<!-- FORMULARIO PRINCIPAL -->
+
+	<header class="topbar">
+	  <span class="back">‹</span>
+	  <span>Nequixd</span>
+	</header>
+
+	<main>
+	  <section class="panel">
+
+		<h1>Envía plata</h1>
+
+		<label for="recipient">Nombre</label>
+		<input id="recipient" value=""
+		  placeholder="Nombre del destinatario">
+
+		<label for="phone">Cel</label>
+		<input id="phone" value=""
+		  type="tel"
+		  inputmode="numeric"
+		  pattern="[0-9 ]*"
+		  maxlength="12"
+		  autocomplete="off"
+		  placeholder="Número de cuenta">
+
+		<label for="amount">Cúanto</label>
+		<input id="amount" value=""
+		  inputmode="decimal"
+		  placeholder="¿Cúanto vas a enviar?">
+
+		<label for="source">
+		  ¿De dónde saldrá la plata?
+		</label>
+
+		<select id="source">
+		  <option>Disponible</option>
+		  <option>Ahorros</option>
+		  <option>Otro origen</option>
+		</select>
+
+		<button id="generate">Continuar</button>
+
+		<p class="note">
+		  Esta aplicación, Nequixd , ha sido desarrollada
+		  exclusivamente con fines educativos,
+		  Todos los derechos reservados. © 2026 Nequixd ®
+		</p>
+
+	  </section>
+	</main>
+
+	<!-- COMPROBANTE -->
+
+	<div class="modal" id="modal"
+	  role="dialog"
+	  aria-modal="true"
+	  aria-label="Comprobante de demostración">
+
+	  <div class="modal-inner">
+
+		<div class="modal-head">
+
+		  <button id="back" aria-label="Volver">
+			<img src="atras.png"
+			  class="icono-atras" alt="">
+		  </button>
+
+		  <span>Detalle del movimiento</span>
+
+		  <span style="margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:1px;">
+
+			<span class="closebutton"
+			  style="font-size:29px;font-weight:300;line-height:1"
+			  aria-hidden="true">?</span>
+
+			<img src="./yi.png"
+			  class="icono-compartir"
+			  alt="Compartir">
+		  </span>
+		</div>
+
+		<div class="receipt" id="receipt">
+
+		  <div class="status">
+			<img src="donw.png"
+			  class="icono-flecha" alt="">
+			<span>Envío Realizado</span>
+		  </div>
+
+		  <div class="dotted"></div>
+
+		  <div class="qrbox" aria-label="Código QR">
+			<div class="qr" id="qr"></div>
+		  </div>
+
+		  <div class="qrlabel">
+			<img src="info.png"
+			  class="infoicon" alt="">
+			<span>
+			  !Escanea este QR con Nequi para verificar
+			  tu envío al instante!
+			  <br><br><br>
+			  <small style="font-size:12px;color:#6a6069"></small>
+			</span>
+		  </div>
+
+		  <div class="info">
+			Para
+			<div class="value" id="out-recipient">
+			  Nombre de ejemplo
+			</div>
+		  </div>
+
+		  <div class="info">
+			¿Cuánto?
+			<div class="value amount" id="out-amount">
+			  $ 1,00
+			</div>
+		  </div>
+
+		  <div class="info payment-detail">
+			Número Nequi
+			<div class="value" id="out-phone">
+			  000 000 0000
+			</div>
+		  </div>
+
+		  <div class="info payment-detail">
+			Fecha
+			<div class="value" id="out-date">—</div>
+		  </div>
+
+		  <div class="info payment-detail">
+			Referencia
+			<div class="value" id="out-reference">—</div>
+		  </div>
+
+		  <div class="info">
+			¿De dónde salió la plata?
+			<div class="value" id="out-source">
+			  Disponible
+			</div>
+		  </div>
+
+		  <div class="bottom">
+			<button id="done">Listo</button>
+		  </div>
+
+		</div>
+	  </div>
+	</div>
+
+<script>
+
+/* CONTROL DE ACCESO */
+
+const accessScreen =
+    document.getElementById('access-screen');
+
+const accessPassword =
+    document.getElementById('access-password');
+
+const accessButton =
+    document.getElementById('access-button');
+
+const accessError =
+    document.getElementById('access-error');
+
+function verificarAcceso() {
+    if (accessPassword.value === '2431') {
+        accessScreen.classList.add('access-hidden');
+        accessPassword.value = '';
+        accessError.textContent = '';
+    } else {
+        accessError.textContent =
+            'Clave incorrecta. Acceso denegado.';
+        accessPassword.value = '';
+        accessPassword.focus();
+    }
+}
+
+accessButton.addEventListener('click', verificarAcceso);
+
+accessPassword.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        verificarAcceso();
+    }
+});
+
+/* FUNCIONES ORIGINALES */
+
+const $ = id => document.getElementById(id);
+
+function updateReceipt() {
+    const raw = $('amount').value.trim()
+        .replace(/\s/g, '')
+        .replace(/\.(?=.*[,])/g, '')
+        .replace(',', '.');
+
+    const n = Number(raw);
+
+    $('out-recipient').textContent =
+        $('recipient').value.trim() || '—';
+
+    $('out-amount').textContent = Number.isFinite(n)
+        ? n.toLocaleString('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })
+        : '—';
+
+    $('out-phone').textContent =
+        $('phone').value.trim() || '—';
+
+    $('out-reference').textContent =
+        window.generatedReference || '—';
+
+    $('out-source').textContent =
+        $('source').value;
+
+    $('out-date').textContent =
+        new Date().toLocaleString('es-CO', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+}
+
+function makeReference() {
+    let result = 'M';
+    for (let i = 0; i < 8; i++) {
+        result += Math.floor(Math.random() * 10);
+    }
+    return result;
+}
+
+$('phone').addEventListener('input', () => {
+    const digits = $('phone').value
+        .replace(/\D/g, '')
+        .slice(0, 10);
+
+    $('phone').value = digits.replace(
+        /^(\d{3})(\d{0,3})(\d{0,4}).*/,
+        (_, a, b, c) =>
+            [a, b, c].filter(Boolean).join(' ')
+    );
+});
+
+function generarQR(contenido) {
+    const contenedor = $('qr');
+    contenedor.innerHTML = '';
+    contenedor.style.position = 'relative';
+
+    if (typeof QRCode === 'undefined') {
+        contenedor.textContent = 'QR no disponible';
+        return;
+    }
+
+    new QRCode(contenedor, {
+        text: contenido,
+        width: 110,
+        height: 110,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    const logo = document.createElement('img');
+    logo.src = 'logo.png';
+    logo.className = 'qr-logo';
+    logo.alt = 'Logotipo';
+    contenedor.appendChild(logo);
+}
+
+$('generate').addEventListener('click', () => {
+    window.generatedReference = makeReference();
+    updateReceipt();
+
+    const contenido = [
+        'Referencia: ' + window.generatedReference,
+    ].join('\n');
+
+    try {
+        generarQR(contenido);
+    } catch (error) {
+        console.error('Error al generar QR:', error);
+    }
+
+    $('modal').classList.add('open');
+    document.body.classList.add('modal-open');
+    $('receipt').scrollTop = 0;
+});
+
+$('back').addEventListener('click', () => {
+    $('modal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+});
+
+$('done').addEventListener('click', () => {
+    $('modal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+});
+
+$('modal').addEventListener('click', e => {
+    if (e.target === $('modal')) {
+        $('modal').classList.remove('open');
+        document.body.classList.remove('modal-open');
+    }
+});
+
+</script>
+  </body>
+</html>
+
+
+
